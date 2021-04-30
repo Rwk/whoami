@@ -22,6 +22,22 @@ const createElement = root => {
     return el
 }
 
+// Sets text selection range - if statement for browser compatibility.
+const setSelectionRange = input => {
+  const length = input.value.length
+
+  if (input.setSelectionRange) { // OTHERS
+    input.focus()
+    input.setSelectionRange(length, length)
+  } else if (input.createTextRange) { // IE
+    const range = input.createTextRange()
+    range.collapse(true)
+    range.moveEnd('character', length)
+    range.moveStart('character', length)
+    range.select()
+  }
+}
+
 // Creates the rendering loop
 const renderer = (tickrate, onrender) => {
     let lastTick = 0
@@ -64,7 +80,6 @@ const terminal = (banner, buflen, tickrate, prompt) => {
 
     const $root = document.querySelector('#terminal')
     const $element = createElement($root)
-    $root.appendChild($element)
 
     const output = (output) => {
         let append = output + '\n' + prompt();
@@ -74,12 +89,21 @@ const terminal = (banner, buflen, tickrate, prompt) => {
     const print = printer($element, buflen)
     const onrender = () => (busy = print(buffer))
     const render = renderer(tickrate, onrender)
+    const focus = () => setTimeout(() => $element.focus(), 1);
+
+    // Events
+    $element.addEventListener('focus', () => setSelectionRange($element));
+    $element.addEventListener('blur', focus)
+    window.addEventListener('focus', focus)
+    $root.addEventListener('click', focus)
+    $root.appendChild($element)
 
     render()
     output(banner)
 
     return {
-        print: output
+      focus,
+      print: output
     }
 }
 
