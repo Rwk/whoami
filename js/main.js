@@ -16,6 +16,7 @@ const createElement = root => {
     el.contentEditable = true
     el.spellcheck = false
     el.value = ''
+    el.autofocus = true
 
     root.appendChild(el)
 
@@ -58,6 +59,37 @@ const renderer = (tickrate, onrender) => {
     return tick
 }
 
+// Handle keyboard events
+const keyboard = () => {
+  let input = []
+  const keys = {8: 'backspace', 13: 'enter'}
+  const ignoreKey = code => code >= 33 && code <= 40
+  const key = ev => keys[ev.which || ev.keyCode]
+
+  return {
+    keypress: (ev) => {
+      if (key(ev) === 'enter') {
+        const str = input.join('').trim()
+        input = []
+      } else if (key(ev) !== 'backspace') {
+        input.push(String.fromCharCode(ev.which || ev.keyCode))
+      }
+    },
+
+    keydown: (ev) => {
+      if (key(ev) === 'backspace') {
+        if (input.length > 0) {
+          input.pop()
+        } else {
+          ev.preventDefault()
+        }
+      } else if (ignoreKey(ev.keyCode)) {
+        ev.preventDefault()
+      }
+    }
+  }
+}
+
 // Printer
 const printer = ($element, buflen) => buffer => {
     if (buffer.length > 0) {
@@ -82,20 +114,26 @@ const terminal = (banner, buflen, tickrate, prompt) => {
     const $element = createElement($root)
 
     const output = (output) => {
-        let append = output + '\n' + prompt();
+        let append = output + '\n' + prompt()
         buffer = buffer.concat(append.split(''))
     }
 
     const print = printer($element, buflen)
     const onrender = () => (busy = print(buffer))
     const render = renderer(tickrate, onrender)
-    const focus = () => setTimeout(() => $element.focus(), 1);
+    const focus = () => setTimeout(() => $element.focus(), 1)
+    const kbd = keyboard()
+    const input = ev => busy
+    ? ev.preventDefault()
+    : kbd[ev.type](ev)
 
     // Events
-    $element.addEventListener('focus', () => setSelectionRange($element));
+    $element.addEventListener('focus', () => setSelectionRange($element))
     $element.addEventListener('blur', focus)
     window.addEventListener('focus', focus)
     $root.addEventListener('click', focus)
+    $element.addEventListener('keypress', input)
+    $element.addEventListener('keydown', input)
     $root.appendChild($element)
 
     render()
