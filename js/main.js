@@ -9,6 +9,14 @@ Tapez "aide" pour vous les commandes disponibles ...
 const buflen = 8
 const tickrate = 1000 / 60
 const prompt = () => '$ > '
+const helpText = `
+Work in progress
+`
+
+// Commands
+const commands = {
+  aide: () => helpText
+}
 
 // Textarea
 const createElement = root => {
@@ -59,8 +67,30 @@ const renderer = (tickrate, onrender) => {
     return tick
 }
 
+// Parses input
+const parser = onparsed => str => {
+  if (str.length) {
+    const args = str.split(' ').map(s => s.trim())
+    const cmd = args.splice(0, 1)[0]
+    console.debug(cmd, args)
+    onparsed(cmd, ...args)
+  }
+}
+
+// Execute commands
+const executor = commands => (cmd, ...args) => cb => {
+  try {
+    commands[cmd]
+      ? cb(commands[cmd](...args) + '\n')
+      : cb(`No such command '${cmd}'\n`)
+  } catch (e) {
+    console.warn(e)
+    cb(`Exception: ${e}\n`)
+  }
+}
+
 // Handle keyboard events
-const keyboard = () => {
+const keyboard = (parse) => {
   let input = []
   const keys = {8: 'backspace', 13: 'enter'}
   const ignoreKey = code => code >= 33 && code <= 40
@@ -70,6 +100,7 @@ const keyboard = () => {
     keypress: (ev) => {
       if (key(ev) === 'enter') {
         const str = input.join('').trim()
+        parse(str)
         input = []
       } else if (key(ev) !== 'backspace') {
         input.push(String.fromCharCode(ev.which || ev.keyCode))
@@ -106,7 +137,7 @@ const printer = ($element, buflen) => buffer => {
 }
 
 // Terminal
-const terminal = (banner, buflen, tickrate, prompt) => {
+const terminal = (banner, buflen, tickrate, prompt, commands) => {
     let buffer = [] // What will be displayed
     let busy = false // If we cannot type at the moment
 
@@ -119,10 +150,13 @@ const terminal = (banner, buflen, tickrate, prompt) => {
     }
 
     const print = printer($element, buflen)
+    const execute = executor(commands)
     const onrender = () => (busy = print(buffer))
+    const onparsed = (cmd, ...args) => execute(cmd, ...args)(output)
     const render = renderer(tickrate, onrender)
+    const parse = parser(onparsed)
     const focus = () => setTimeout(() => $element.focus(), 1)
-    const kbd = keyboard()
+    const kbd = keyboard(parse)
     const input = ev => busy
     ? ev.preventDefault()
     : kbd[ev.type](ev)
@@ -141,13 +175,14 @@ const terminal = (banner, buflen, tickrate, prompt) => {
 
     return {
       focus,
+      parse,
       print: output
     }
 }
 
 // Onload
 const load = () => {
-    const t = terminal(banner, buflen, tickrate, prompt)
+    const t = terminal(banner, buflen, tickrate, prompt, commands)
 }
 
 document.addEventListener('DOMContentLoaded', load)
