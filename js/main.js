@@ -10,12 +10,43 @@ const buflen = 8
 const tickrate = 1000 / 60
 const prompt = () => '$ > '
 const helpText = `
-Work in progress
+Liste des commandes disponibles : 
+
+aide - Affiche la liste des commandes disponibles
+contact - Affiche les informations de contact
 `
+
+const contactInfo = {
+  email: 'raphael.deschler@gmail.com',
+  github: 'https://github.com/Rwk',
+  facebook: 'https://www.facebook.com/RwkZeJedi'
+}
+
+const contactList = Object.keys(contactInfo)
+  .reduce((result, key) => result.concat([`${key} - ${contactInfo[key]}`]), [])
+  .join('\n');
+
+const contactText = `
+
+${contactList}
+Use ex. 'contact github' to open the links.
+`;
+
+const openContact = key => window.open(key === 'email'
+  ? `mailto:${contactInfo[key]}`
+  : contactInfo[key]);
 
 // Commands
 const commands = {
-  aide: () => helpText
+  aide: () => helpText,
+  contact: (key) => {
+    if (key in contactInfo) {
+      openContact(key);
+      return `Ouverture - ${key} - ${contactInfo[key]}`;
+    }
+
+    return contactText;
+  }
 }
 
 // Textarea
