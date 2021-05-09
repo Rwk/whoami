@@ -1,19 +1,22 @@
 // Vars
 const banner = `
-Initialisation du terminal ...
-Chargement du profil : Raphaël Deschler ...
+Initializing the terminal ...
+Loading profile : Raphaël Deschler ...
 ...
-Vous êtes maintenant connecté ...
-Tapez "aide" pour vous les commandes disponibles ...
+🆆🅴🅻🅲🅾🅼🅴
+...
+You are now connected ...
+Enter "help" to see the list of available commands
 `
 const buflen = 8
 const tickrate = 1000 / 60
 const prompt = () => '$ > '
 const helpText = `
-Liste des commandes disponibles : 
+Available commands : 
 
-aide - Affiche la liste des commandes disponibles
-contact - Affiche les informations de contact
+help - Displays the list of available commands
+contact - Displays the contact list
+contact <key> - Opens the contact link
 `
 
 const contactInfo = {
@@ -38,7 +41,7 @@ const openContact = key => window.open(key === 'email'
 
 // Commands
 const commands = {
-  aide: () => helpText,
+  help: () => helpText,
   contact: (key) => {
     if (key in contactInfo) {
       openContact(key);
