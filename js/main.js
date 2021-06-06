@@ -14,9 +14,10 @@ const prompt = () => '$ > '
 const helpText = `
 Available commands : 
 
-help - Displays the list of available commands
+clear - Clears the display
 contact - Displays the contact list
 contact <key> - Opens the contact link
+help - Displays the list of available commands
 `
 
 const contactInfo = {
@@ -38,19 +39,6 @@ Use ex. 'contact github' to open the links.
 const openContact = key => window.open(key === 'email'
   ? `mailto:${contactInfo[key]}`
   : contactInfo[key]);
-
-// Commands
-const commands = {
-  help: () => helpText,
-  contact: (key) => {
-    if (key in contactInfo) {
-      openContact(key);
-      return `Ouverture - ${key} - ${contactInfo[key]}`;
-    }
-
-    return contactText;
-  }
-}
 
 // Textarea
 const createElement = root => {
@@ -171,7 +159,9 @@ const printer = ($element, buflen) => buffer => {
 }
 
 // Terminal
-const terminal = (banner, buflen, tickrate, prompt, commands) => {
+const terminal = (options) => {
+    const {banner, buflen, tickrate, prompt, commands} = options
+  
     let buffer = [] // What will be displayed
     let busy = false // If we cannot type at the moment
 
@@ -191,6 +181,7 @@ const terminal = (banner, buflen, tickrate, prompt, commands) => {
     const parse = parser(onparsed)
     const focus = () => setTimeout(() => $element.focus(), 1)
     const kbd = keyboard(parse)
+    const clear = () => ($element.value = '')
     const input = ev => busy
     ? ev.preventDefault()
     : kbd[ev.type](ev)
@@ -210,13 +201,31 @@ const terminal = (banner, buflen, tickrate, prompt, commands) => {
     return {
       focus,
       parse,
+      clear,
       print: output
     }
 }
 
 // Onload
 const load = () => {
-    const t = terminal(banner, buflen, tickrate, prompt, commands)
+  const t = terminal({
+    banner,
+    buflen,
+    tickrate,
+    prompt,
+    commands : {
+      clear: () => t.clear(),
+      contact: (key) => {
+        if (key in contactInfo) {
+          openContact(key);
+          return `Opening - ${key} - ${contactInfo[key]}`;
+        }
+    
+        return contactText;
+      },
+      help: () => helpText
+    }
+  })
 }
 
 document.addEventListener('DOMContentLoaded', load)
