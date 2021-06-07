@@ -81,12 +81,52 @@ const browser = (function() {
     location: '/',
     filename: 'EXPERIENCE',
     type: 'file',
-    content: 'Experience'
+    content: `
+      August 2018 - Today : Product Owner @Linxo Group
+      - 2020 / 2021 : Integration of PSD2 APIs (AIS)
+      - 2019 / 2020 : Infrastructure as product
+      - 2018 / 2019 : Oxlin PFM-API
+      
+      September 2017 - August 2018 : Senior fullstack developer @Linxo
+      - Oxlin PFM-API + OAuth2 server + Webviews
+      - nodeJS + React
+
+      October 2015 - September 2017 : Senior fullstack developer @Neteden/Dreamnex
+      - Payment platform
+      - Dating platform engine
+      - Symfony 1.4 / 2 / 3 + Angular JS + jQuery + nodeJS + Elastic Search
+
+      January 2015 - October 2015 : Fullstack developer @Mon mariage
+      - Development of a multi-brand e-commerce site for announcements and their personalisation
+      - Backend : Symfony 2 + jQuery
+      - Frontend : HTML + CSS + jQuery
+
+      August 2011 - January 2015 : Fullstack developer + Sysadmin @La Ligne Web
+      - Creation of several dozens of ecommerce websites
+      - Creation of several dozens of websites
+      - PHP (Zend Framework + Codeigniter) + Wordpress + Prestashop + jQuery
+      - Server management (PLESK + CPanel)
+
+      July 2010 - December 2017 : Freelancer
+      - Developing websites for no-budget projects
+      - Philantropy
+
+      January 2009 - August 2011 : creation of the web agency @Web Innovation
+      - Creation of several dozens of websites
+      - Creation of CMS Babel (R.I.P 2011)
+
+      June 2006 - June 2008 : Internship + Fixed-term contract @Hexis
+      - Development of a content management system
+      - PHP + MySQL + Mootools + Smarty 
+    `
   }, {
     location: '/',
     filename: 'EDUCATION',
     type: 'file',
-    content: 'Education'
+    content: `
+    2008 - @IUT Béziers - Professional degree in Voice/Data System Integration
+    2007 - @IUT Béziers - University Diploma of Technology in Services and Communication Networks
+    `
   }]
 
   const fix = str => str.trim().replace(/\/+/g, '/') || '/'
