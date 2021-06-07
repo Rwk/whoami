@@ -14,10 +14,14 @@ const prompt = () => '$ > '
 const helpText = `
 Available commands : 
 
+cat <filename> - Lists file contents
+cd <dir> - Enters directory
 clear - Clears the display
 contact - Displays the contact list
 contact <key> - Opens the contact link
 help - Displays the list of available commands
+ls - Lists files
+pwd - Lists current directory
 `
 
 const contactInfo = {
@@ -28,17 +32,120 @@ const contactInfo = {
 
 const contactList = Object.keys(contactInfo)
   .reduce((result, key) => result.concat([`${key} - ${contactInfo[key]}`]), [])
-  .join('\n');
+  .join('\n')
 
 const contactText = `
 
 ${contactList}
 Use ex. 'contact github' to open the links.
-`;
+`
 
 const openContact = key => window.open(key === 'email'
   ? `mailto:${contactInfo[key]}`
-  : contactInfo[key]);
+  : contactInfo[key])
+
+// File browser
+const browser = (function() {
+  let current = '/'
+
+  let tree = [{
+    location: '/',
+    filename: 'SKILLS',
+    type: 'file',
+    content: `
+      Product Owner - 3 years
+      - Agility & Scrum
+      - Making incredible roadmaps
+      - PSD2, Open Banking, STET, Berlin Group
+      - JIRA, Gantt Project, Trello
+      - Technical & functional specifications : UML, C4
+
+      Fullstack Developper - 11 years
+      - Front : React, jQuery
+      - Back : nodeJS (Express, HAPI), PHP (Symfony, CodeIgniter)
+      - CMS : Hugo, Wordpress, Prestashop
+
+      Panda - from the beginning
+      - Sweet and adorable and cute
+      - Funny
+
+      Jedi - from the beginning
+      - Do or do not. There is no try.
+      - Fear is the path to the dark side. Fear leads to anger. Anger leads to hate. Hate leads to suffering.
+      
+      Viking - from the beginning
+      - Robust and builds cool stuff sometimes
+      - Skål
+    `
+  }, {
+    location: '/',
+    filename: 'EXPERIENCE',
+    type: 'file',
+    content: 'Experience'
+  }, {
+    location: '/',
+    filename: 'EDUCATION',
+    type: 'file',
+    content: 'Education'
+  }]
+
+  const fix = str => str.trim().replace(/\/+/g, '/') || '/'
+
+  const setCurrent = dir => {
+    if (typeof dir !== 'undefined') {
+      if (dir == '..') {
+        const parts = current.split('/')
+        parts.pop()
+        current = fix(parts.join('/'))
+      } else {
+        const found = tree.filter(iter => iter.location === current)
+          .find(iter => iter.filename === fix(dir))
+
+        if (found) {
+          current = fix(current + '/' + dir)
+        } else {
+          return `Directory '${dir}' not found in '${current}'`
+        }
+      }
+
+      return `Entered '${current}'`
+    }
+
+    return current
+  }
+
+  const ls = () => {
+    const found = tree.filter(iter => iter.location === current)
+    const fileCount = found.filter(iter => iter.type === 'file').length
+    const directoryCount = found.filter(iter => iter.type === 'directory').length
+    const status = `${fileCount} file(s), ${directoryCount} dir(s)`
+    const maxlen = Math.max(...found.map(iter => iter.filename).map(n => n.length))
+
+    const list = found.map(iter => {
+      return `${iter.filename.padEnd(maxlen + 1, ' ')} <${iter.type}>`
+    }).join('\n')
+
+    return `${list}\n\n${status} in ${current}`
+  }
+
+  const cat = filename => {
+    const found = tree.filter(iter => iter.location === current)
+    const foundFile = found.find(iter => iter.filename === filename)
+
+    if (foundFile) {
+      return foundFile.content
+    }
+
+    return `File '${filename}' not found in '${current}'`
+  }
+
+  return {
+    pwd: () => setCurrent(),
+    cd: dir => setCurrent(fix(dir)),
+    cat,
+    ls
+  }
+})()
 
 // Textarea
 const createElement = root => {
@@ -214,15 +321,19 @@ const load = () => {
     tickrate,
     prompt,
     commands : {
+      cat: file => browser.cat(file),
+      cd: dir => browser.cd(dir),
       clear: () => t.clear(),
       contact: (key) => {
         if (key in contactInfo) {
-          openContact(key);
-          return `Opening - ${key} - ${contactInfo[key]}`;
+          openContact(key)
+          return `Opening - ${key} - ${contactInfo[key]}`
         }
     
-        return contactText;
+        return contactText
       },
+      pwd: () => browser.pwd(),
+      ls: () => browser.ls(),
       help: () => helpText
     }
   })
