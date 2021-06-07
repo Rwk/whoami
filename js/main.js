@@ -79,7 +79,7 @@ const browser = (function() {
     `
   }, {
     location: '/',
-    filename: 'EXPERIENCE',
+    filename: 'EXPERIENCE-1',
     type: 'file',
     content: `
       August 2018 - Today : Product Owner @Linxo Group
@@ -106,7 +106,12 @@ const browser = (function() {
       - Creation of several dozens of websites
       - PHP (Zend Framework + Codeigniter) + Wordpress + Prestashop + jQuery
       - Server management (PLESK + CPanel)
-
+    `
+  }, {
+    location: '/',
+    filename: 'EXPERIENCE-0',
+    type: 'file',
+    content: `
       July 2010 - December 2017 : Freelancer
       - Developing websites for no-budget projects
       - Philantropy
